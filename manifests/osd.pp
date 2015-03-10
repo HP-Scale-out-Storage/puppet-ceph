@@ -65,10 +65,17 @@ define ceph::osd (
       exec { $ceph_prepare:
         command   => "/bin/true # comment to satisfy puppet syntax requirements
 set -ex
-if ! test -b ${data} ; then
-  mkdir -p ${data}
+if [ ${data} = discover ] ; then
+  # 'Unrecognized escape sequence' warning ... Not sure how to rectify this
+  for disk in `ceph-disk list | awk '/\/dev\/sd[a-z]+ other, unknown/ {print \$1}'` ; do
+    ceph-disk prepare ${cluster_option} \$disk ${journal}
+  done
+else
+  if ! test -b ${data} ; then
+    mkdir -p ${data}
+  fi
+  ceph-disk prepare ${cluster_option} ${data} ${journal}
 fi
-ceph-disk prepare ${cluster_option} ${data} ${journal}
 ",
         unless    => "/bin/true # comment to satisfy puppet syntax requirements
 set -ex
