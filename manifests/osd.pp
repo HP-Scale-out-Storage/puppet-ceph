@@ -104,6 +104,9 @@ ceph-disk list | grep ' *${data}.*ceph data, active' ||
 ls -ld /var/lib/ceph/osd/${cluster_name}-* | grep ' ${data}'
 ",
         logoutput => true,
+        
+        # For systems with large number of drives (e.g., 25), default (300 sec) could time out
+        timeout   => 1200,
       }
 
     } else {
